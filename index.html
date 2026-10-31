@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Little Library</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">&#9998;</span>
+      <span class="brand-name">My Little Library</span>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard" aria-current="page">
+        <span class="nav-icon">&#9632;</span> Dashboard
+      </button>
+      <button class="nav-item" data-view="collection">
+        <span class="nav-icon">&#9641;</span> My Books
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <span>Personal book organizer</span>
+    </div>
+  </aside>
+
+  <!-- Mobile header -->
+  <header class="mobile-header">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu">&#9776;</button>
+    <span class="mobile-brand">My Little Library</span>
+  </header>
+
+  <!-- Sidebar overlay for mobile -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <!-- Main content -->
+  <main class="main" id="mainContent">
+
+    <!-- ── DASHBOARD VIEW ── -->
+    <section class="view" id="view-dashboard">
+      <header class="view-header">
+        <h1 class="view-title">Dashboard</h1>
+        <p class="view-subtitle">An overview of your reading collection.</p>
+      </header>
+
+      <div class="stats-grid">
+        <div class="stat-card stat-total">
+          <span class="stat-label">Total Books</span>
+          <span class="stat-number" id="statTotal">0</span>
+        </div>
+        <div class="stat-card stat-want">
+          <span class="stat-label">Want to Read</span>
+          <span class="stat-number" id="statWant">0</span>
+        </div>
+        <div class="stat-card stat-reading">
+          <span class="stat-label">Reading</span>
+          <span class="stat-number" id="statReading">0</span>
+        </div>
+        <div class="stat-card stat-finished">
+          <span class="stat-label">Finished</span>
+          <span class="stat-number" id="statFinished">0</span>
+        </div>
+      </div>
+
+      <div class="dashboard-categories" id="dashCategoryList">
+        <h2 class="section-heading">Books by Category</h2>
+        <div class="category-bars" id="categoryBars"></div>
+      </div>
+
+      <div class="dashboard-recent">
+        <h2 class="section-heading">Recently Added</h2>
+        <div class="recent-list" id="recentList"></div>
+      </div>
+    </section>
+
+    <!-- ── COLLECTION VIEW ── -->
+    <section class="view hidden" id="view-collection">
+      <header class="view-header view-header--row">
+        <div>
+          <h1 class="view-title">My Books</h1>
+          <p class="view-subtitle">Browse, search, and manage your collection.</p>
+        </div>
+        <button class="btn btn-primary" id="addBookBtn">+ Add Book</button>
+      </header>
+
+      <!-- Search & filters -->
+      <div class="filters-bar">
+        <div class="search-wrap">
+          <span class="search-icon">&#128269;</span>
+          <input
+            type="search"
+            id="searchInput"
+            class="search-input"
+            placeholder="Search by title or author…"
+            aria-label="Search books"
+          />
+        </div>
+        <select id="filterCategory" class="filter-select" aria-label="Filter by category">
+          <option value="">All Categories</option>
+          <option>Psychology</option>
+          <option>Philosophy</option>
+          <option>Literature</option>
+          <option>Cinema</option>
+          <option>Technology</option>
+          <option>Other</option>
+        </select>
+        <select id="filterStatus" class="filter-select" aria-label="Filter by status">
+          <option value="">All Statuses</option>
+          <option>Want to Read</option>
+          <option>Reading</option>
+          <option>Finished</option>
+        </select>
+        <button class="btn btn-ghost" id="clearFiltersBtn">Clear</button>
+      </div>
+
+      <!-- Book grid -->
+      <div class="book-grid" id="bookGrid" aria-live="polite"></div>
+
+      <!-- Empty state -->
+      <div class="empty-state hidden" id="emptyState">
+        <div class="empty-icon">&#128218;</div>
+        <p class="empty-title" id="emptyTitle">Your library is empty.</p>
+        <p class="empty-sub" id="emptySub">Add your first book to get started.</p>
+        <button class="btn btn-primary" id="emptyAddBtn">+ Add Book</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── BOOK FORM MODAL ── -->
+  <div class="modal-backdrop hidden" id="formModal" role="dialog" aria-modal="true" aria-labelledby="formModalTitle">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="formModalTitle">Add Book</h2>
+        <button class="modal-close" id="formModalClose" aria-label="Close">&times;</button>
+      </div>
+      <form id="bookForm" novalidate>
+        <input type="hidden" id="bookId" />
+        <div class="form-group">
+          <label class="form-label" for="fieldTitle">Title <span class="required">*</span></label>
+          <input type="text" id="fieldTitle" class="form-input" placeholder="Book title" maxlength="200" />
+          <span class="form-error" id="errTitle"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fieldAuthor">Author <span class="required">*</span></label>
+          <input type="text" id="fieldAuthor" class="form-input" placeholder="Author name" maxlength="200" />
+          <span class="form-error" id="errAuthor"></span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="fieldCategory">Category <span class="required">*</span></label>
+            <select id="fieldCategory" class="form-input">
+              <option value="">— select —</option>
+              <option>Psychology</option>
+              <option>Philosophy</option>
+              <option>Literature</option>
+              <option>Cinema</option>
+              <option>Technology</option>
+              <option>Other</option>
+            </select>
+            <span class="form-error" id="errCategory"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fieldStatus">Status <span class="required">*</span></label>
+            <select id="fieldStatus" class="form-input">
+              <option value="">— select —</option>
+              <option>Want to Read</option>
+              <option>Reading</option>
+              <option>Finished</option>
+            </select>
+            <span class="form-error" id="errStatus"></span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="fieldNotes">Notes <span class="optional">(optional)</span></label>
+          <textarea id="fieldNotes" class="form-input form-textarea" placeholder="Personal notes…" maxlength="1000" rows="3"></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="formCancelBtn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="formSaveBtn">Save Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── DELETE CONFIRMATION MODAL ── -->
+  <div class="modal-backdrop hidden" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="modal modal--sm">
+      <div class="modal-header">
+        <h2 class="modal-title" id="deleteModalTitle">Delete Book</h2>
+        <button class="modal-close" id="deleteModalClose" aria-label="Close">&times;</button>
+      </div>
+      <p class="delete-msg">Are you sure you want to remove <strong id="deleteBookTitle"></strong> from your library? This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="deleteCancelBtn">Cancel</button>
+        <button type="button" class="btn btn-danger" id="deleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
