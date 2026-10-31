@@ -15,16 +15,14 @@
       <span class="brand-name">My Little Library</span>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" data-view="dashboard" aria-current="page">
+      <button class="nav-item active" data-view="dashboard">
         <span class="nav-icon">&#9632;</span> Dashboard
       </button>
       <button class="nav-item" data-view="collection">
         <span class="nav-icon">&#9641;</span> My Books
       </button>
     </nav>
-    <div class="sidebar-footer">
-      <span>Personal book organizer</span>
-    </div>
+    <div class="sidebar-footer">Personal book organizer</div>
   </aside>
 
   <!-- Mobile header -->
@@ -33,7 +31,6 @@
     <span class="mobile-brand">My Little Library</span>
   </header>
 
-  <!-- Sidebar overlay for mobile -->
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- Main content -->
@@ -45,7 +42,6 @@
         <h1 class="view-title">Dashboard</h1>
         <p class="view-subtitle">An overview of your reading collection.</p>
       </header>
-
       <div class="stats-grid">
         <div class="stat-card stat-total">
           <span class="stat-label">Total Books</span>
@@ -64,12 +60,10 @@
           <span class="stat-number" id="statFinished">0</span>
         </div>
       </div>
-
-      <div class="dashboard-categories" id="dashCategoryList">
+      <div class="dashboard-categories">
         <h2 class="section-heading">Books by Category</h2>
         <div class="category-bars" id="categoryBars"></div>
       </div>
-
       <div class="dashboard-recent">
         <h2 class="section-heading">Recently Added</h2>
         <div class="recent-list" id="recentList"></div>
@@ -81,7 +75,7 @@
       <header class="view-header view-header--row">
         <div>
           <h1 class="view-title">My Books</h1>
-          <p class="view-subtitle">Browse, search, and manage your collection.</p>
+          <p class="view-subtitle">Upload, browse, and read your collection.</p>
         </div>
         <button class="btn btn-primary" id="addBookBtn">+ Add Book</button>
       </header>
@@ -90,13 +84,7 @@
       <div class="filters-bar">
         <div class="search-wrap">
           <span class="search-icon">&#128269;</span>
-          <input
-            type="search"
-            id="searchInput"
-            class="search-input"
-            placeholder="Search by title or author…"
-            aria-label="Search books"
-          />
+          <input type="search" id="searchInput" class="search-input" placeholder="Search by title or author…" aria-label="Search books" />
         </div>
         <select id="filterCategory" class="filter-select" aria-label="Filter by category">
           <option value="">All Categories</option>
@@ -116,14 +104,12 @@
         <button class="btn btn-ghost" id="clearFiltersBtn">Clear</button>
       </div>
 
-      <!-- Book grid -->
       <div class="book-grid" id="bookGrid" aria-live="polite"></div>
 
-      <!-- Empty state -->
       <div class="empty-state hidden" id="emptyState">
         <div class="empty-icon">&#128218;</div>
         <p class="empty-title" id="emptyTitle">Your library is empty.</p>
-        <p class="empty-sub" id="emptySub">Add your first book to get started.</p>
+        <p class="empty-sub" id="emptySub">Upload a PDF or ePub to get started.</p>
         <button class="btn btn-primary" id="emptyAddBtn">+ Add Book</button>
       </div>
     </section>
@@ -139,15 +125,41 @@
       </div>
       <form id="bookForm" novalidate>
         <input type="hidden" id="bookId" />
+
+        <!-- File upload area (only shown when adding) -->
+        <div class="form-group" id="fileUploadGroup">
+          <label class="form-label">File <span class="required">*</span></label>
+          <div class="file-drop-area" id="fileDropArea">
+            <div class="file-drop-inner" id="fileDropInner">
+              <span class="file-drop-icon">&#128196;</span>
+              <p class="file-drop-text">Drop a PDF or ePub here, or <label for="fileInput" class="file-browse-link">browse</label></p>
+              <p class="file-drop-hint">PDF and ePub files supported</p>
+            </div>
+            <div class="file-selected hidden" id="fileSelected">
+              <span class="file-sel-icon">&#128196;</span>
+              <div class="file-sel-info">
+                <span class="file-sel-name" id="fileSelName"></span>
+                <span class="file-sel-size" id="fileSelSize"></span>
+              </div>
+              <button type="button" class="file-sel-remove" id="fileSelRemove" aria-label="Remove file">&times;</button>
+            </div>
+          </div>
+          <input type="file" id="fileInput" accept=".pdf,.epub" class="hidden" />
+          <span class="form-error" id="errFile"></span>
+          <div class="upload-progress hidden" id="uploadProgress">
+            <div class="upload-bar" id="uploadBar"></div>
+          </div>
+          <p class="file-size-warning hidden" id="fileSizeWarning">&#9888; File is large (&gt;8 MB). It may not save reliably in localStorage. Consider using a smaller file.</p>
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="fieldTitle">Title <span class="required">*</span></label>
           <input type="text" id="fieldTitle" class="form-input" placeholder="Book title" maxlength="200" />
           <span class="form-error" id="errTitle"></span>
         </div>
         <div class="form-group">
-          <label class="form-label" for="fieldAuthor">Author <span class="required">*</span></label>
+          <label class="form-label" for="fieldAuthor">Author <span class="optional">(optional)</span></label>
           <input type="text" id="fieldAuthor" class="form-input" placeholder="Author name" maxlength="200" />
-          <span class="form-error" id="errAuthor"></span>
         </div>
         <div class="form-row">
           <div class="form-group">
@@ -201,6 +213,26 @@
     </div>
   </div>
 
+  <!-- ── READER PANEL ── -->
+  <div class="reader-panel hidden" id="readerPanel">
+    <div class="reader-topbar">
+      <div class="reader-book-info">
+        <span class="reader-title" id="readerTitle"></span>
+        <span class="reader-author" id="readerAuthor"></span>
+      </div>
+      <div class="reader-controls">
+        <button class="btn btn-ghost btn-sm" id="readerOpenExternal" title="Open in new tab">&#128279; Open in tab</button>
+        <button class="reader-close-btn" id="readerCloseBtn" aria-label="Close reader">&times;</button>
+      </div>
+    </div>
+    <div class="reader-body" id="readerBody">
+      <!-- PDF iframe or ePub container injected here -->
+    </div>
+  </div>
+  <div class="reader-overlay hidden" id="readerOverlay"></div>
+
+  <!-- epub.js from CDN for ePub rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
